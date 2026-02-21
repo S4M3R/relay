@@ -33,5 +33,13 @@ export function extractToken(req: http.IncomingMessage): string | null {
   }
   // Try ?token= query parameter
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
-  return url.searchParams.get('token');
+  const queryToken = url.searchParams.get('token');
+  if (queryToken) return queryToken;
+  // Try relay-token cookie (set by dashboard frontend)
+  const cookie = req.headers['cookie'];
+  if (cookie) {
+    const match = cookie.match(/(?:^|; )relay-token=([^;]+)/);
+    if (match) return match[1];
+  }
+  return null;
 }
