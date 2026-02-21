@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { JSONFilePreset } from 'lowdb/node';
 import type { Low } from 'lowdb';
-import type { RelayConfig, ConversationInstance, TranscriptMessage } from '../types.js';
+import type { RelayConfig, ConversationInstance, TranscriptMessage, Contact } from '../types.js';
 
 // ============================================
 // Store Directory (exported for other modules)
@@ -24,6 +24,10 @@ export interface InstancesData {
 
 export interface TranscriptsData {
   transcripts: TranscriptMessage[];
+}
+
+export interface ContactsData {
+  contacts: Contact[];
 }
 
 // ============================================
@@ -51,6 +55,10 @@ const DEFAULT_INSTANCES: InstancesData = {
 
 const DEFAULT_TRANSCRIPTS: TranscriptsData = {
   transcripts: [],
+};
+
+const DEFAULT_CONTACTS: ContactsData = {
+  contacts: [],
 };
 
 // ============================================
@@ -124,6 +132,7 @@ function ensureStoreDir(): void {
 let configDb: Low<ConfigData> | null = null;
 let instancesDb: Low<InstancesData> | null = null;
 let transcriptsDb: Low<TranscriptsData> | null = null;
+let contactsDb: Low<ContactsData> | null = null;
 
 /**
  * Returns the config database instance.
@@ -159,6 +168,17 @@ export function getTranscriptsDb(): Low<TranscriptsData> {
 }
 
 /**
+ * Returns the contacts database instance.
+ * Throws if stores have not been initialized.
+ */
+export function getContactsDb(): Low<ContactsData> {
+  if (!contactsDb) {
+    throw new Error('Stores not initialized. Call initStores() first.');
+  }
+  return contactsDb;
+}
+
+/**
  * Initializes all three lowdb databases and ensures the .relay-agent/ directory exists.
  * Must be called before any store operations.
  */
@@ -179,5 +199,10 @@ export async function initStores(): Promise<void> {
   transcriptsDb = await JSONFilePreset<TranscriptsData>(
     path.join(STORE_DIR, 'transcripts.json'),
     DEFAULT_TRANSCRIPTS,
+  );
+
+  contactsDb = await JSONFilePreset<ContactsData>(
+    path.join(STORE_DIR, 'contacts.json'),
+    DEFAULT_CONTACTS,
   );
 }

@@ -2,6 +2,7 @@ import type { TelegramIncomingMessage } from './connection.js';
 import { registerChatMapping } from './connection.js';
 import * as InstanceStore from '../store/instances.js';
 import * as TranscriptStore from '../store/transcripts.js';
+import * as ContactStore from '../store/contacts.js';
 import { transition } from '../engine/state-machine.js';
 import { processWithAgent } from '../agent/session.js';
 import { cancelHeartbeat, scheduleHeartbeat } from '../engine/heartbeat.js';
@@ -64,6 +65,18 @@ async function handleIncomingMessage(
 
   // Normalize phone number to international format with + prefix
   const phone = senderPhone.startsWith('+') ? senderPhone : `+${senderPhone}`;
+
+  // Auto-create contact record for this sender
+  try {
+    // If phone looks like a chat ID (all digits, no +), use findOrCreateByTelegramChatId
+    if (phone === `+${chatId}` || phone === chatId) {
+      await ContactStore.findOrCreateByTelegramChatId(chatId);
+    } else {
+      await ContactStore.findOrCreateByPhone(phone, 'telegram', chatId);
+    }
+  } catch (err) {
+    logger.warn({ phone, chatId, error: err instanceof Error ? err.message : 'Unknown' }, 'Failed to auto-create contact from Telegram message');
+  }
 
   // Look up active instance for this contact
   // Try by phone number first, then by chat ID as the contact identifier

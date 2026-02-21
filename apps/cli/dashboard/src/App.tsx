@@ -10,6 +10,8 @@ import LoginPage from './pages/LoginPage';
 import ConfigPage from './pages/ConfigPage';
 import CallPage from './pages/CallPage';
 import TelegramLoginPage from './pages/TelegramLoginPage';
+import ContactsPage from './pages/ContactsPage';
+import ContactDetailPage from './pages/ContactDetailPage';
 import { setOnUnauthorized } from './lib/api';
 
 function UnauthorizedScreen() {
@@ -57,6 +59,8 @@ export default function App() {
     <Routes>
       <Route element={<DashboardLayout />}>
         <Route path="/" element={<StatusPage />} />
+        <Route path="/contacts" element={<ContactsPage />} />
+        <Route path="/contacts/:id" element={<ContactDetailPage />} />
         <Route path="/instances" element={<InstancesPage />} />
         <Route path="/instances/new" element={<CreateInstancePage />} />
         <Route path="/instances/:id" element={<InstanceDetailPage />} />

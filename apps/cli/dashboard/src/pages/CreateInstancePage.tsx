@@ -4,9 +4,9 @@
  * Submits to POST /instances and redirects to the instance detail page on success.
  */
 
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { apiPost, ApiError } from '../lib/api';
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { apiPost, apiGet, ApiError } from '../lib/api';
 
 interface CreateInstanceResponse {
   id: string;
@@ -28,13 +28,39 @@ function createTodoEntry(text = ''): TodoEntry {
   return { key: nextTodoKey++, text };
 }
 
+interface ContactInfo {
+  id: string;
+  name: string;
+  phone: string | null;
+  telegram_chat_id: string | null;
+  channel: string;
+}
+
 export default function CreateInstancePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const contactIdParam = searchParams.get('contact');
 
   const [objective, setObjective] = useState('');
   const [targetContact, setTargetContact] = useState('');
   const [telegramChatId, setTelegramChatId] = useState('');
   const [channel, setChannel] = useState<Channel>('whatsapp');
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+
+  // Pre-fill from contact if URL param provided
+  useEffect(() => {
+    if (!contactIdParam) return;
+    apiGet<ContactInfo>(`/contacts/${contactIdParam}`).then((contact) => {
+      setContactInfo(contact);
+      if (contact.phone) setTargetContact(contact.phone);
+      if (contact.telegram_chat_id) setTelegramChatId(contact.telegram_chat_id);
+      if (contact.channel === 'telegram' || contact.channel === 'phone') {
+        setChannel(contact.channel as Channel);
+      }
+    }).catch(() => {
+      // Contact not found, ignore
+    });
+  }, [contactIdParam]);
   const [todos, setTodos] = useState<TodoEntry[]>(() => [createTodoEntry()]);
   const [intervalMs, setIntervalMs] = useState(1800000);
   const [maxFollowups, setMaxFollowups] = useState(5);
@@ -146,6 +172,14 @@ export default function CreateInstancePage() {
       )}
 
       <form onSubmit={handleSubmit}>
+        {contactInfo && (
+          <div className="mb-4 rounded-lg border border-accent-blue/20 bg-accent-blue/5 px-4 py-3">
+            <p className="text-xs font-mono text-accent-blue">
+              Creating instance for contact: <span className="font-bold">{contactInfo.name}</span>
+              {contactInfo.phone && <span className="text-white/40 ml-2">{contactInfo.phone}</span>}
+            </p>
+          </div>
+        )}
         <div className="rounded-lg border border-glass-border bg-glass p-6 space-y-5">
           {/* Objective */}
           <div>

@@ -105,3 +105,36 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   }
   return handleResponse<T>(response);
 }
+
+export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new ApiError(
+      'Cannot reach daemon. Is the relay daemon running?',
+      0,
+    );
+  }
+  return handleResponse<T>(response);
+}
+
+export async function apiDelete<T>(path: string): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+  } catch {
+    throw new ApiError(
+      'Cannot reach daemon. Is the relay daemon running?',
+      0,
+    );
+  }
+  return handleResponse<T>(response);
+}
