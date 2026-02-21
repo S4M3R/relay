@@ -5,6 +5,7 @@ import InstancesPage from './pages/InstancesPage';
 import InstanceDetailPage from './pages/InstanceDetailPage';
 import CreateInstancePage from './pages/CreateInstancePage';
 import TranscriptPage from './pages/TranscriptPage';
+import LoginPage from './pages/LoginPage';
 
 function Placeholder({ name }: { name: string }) {
   return (
@@ -26,7 +27,7 @@ export default function App() {
         <Route path="/instances/new" element={<CreateInstancePage />} />
         <Route path="/instances/:id" element={<InstanceDetailPage />} />
         <Route path="/instances/:id/transcript" element={<TranscriptPage />} />
-        <Route path="/login" element={<Placeholder name="Login" />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/config" element={<Placeholder name="Config" />} />
         <Route path="/call" element={<Placeholder name="Call" />} />
       </Route>

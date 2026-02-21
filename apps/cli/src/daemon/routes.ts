@@ -19,6 +19,7 @@ import {
   isConnected as isWhatsAppConnected,
   sendMessage as sendWhatsAppMessage,
   phoneToJid,
+  getQrData,
 } from '../whatsapp/connection.js';
 import {
   isConnected as isTelegramConnected,
@@ -671,6 +672,25 @@ export async function handleRequest(
   const route = parseRoute(urlPath);
 
   try {
+    // GET /api/login/qr -- return latest QR code data and connection status
+    if (method === 'GET' && urlPath === '/api/login/qr') {
+      const qrData = getQrData();
+      sendJson(res, 200, qrData);
+      return;
+    }
+
+    // POST /api/login/connect -- trigger WhatsApp connection
+    if (method === 'POST' && urlPath === '/api/login/connect') {
+      try {
+        await connectWhatsApp();
+        sendJson(res, 200, { initiated: true });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        sendError(res, 500, 'Failed to initiate WhatsApp connection', message);
+      }
+      return;
+    }
+
     // POST /init
     if (method === 'POST' && route.base === 'init' && !route.id) {
       await handleInit(body, res);
