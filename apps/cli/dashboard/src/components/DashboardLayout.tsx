@@ -28,6 +28,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/login', label: 'Login', shortLabel: 'LOG' },
   { to: '/config', label: 'Config', shortLabel: 'CFG' },
   { to: '/call', label: 'Call', shortLabel: 'CAL' },
+  { to: '/telegram-login', label: 'Telegram', shortLabel: 'TG' },
 ];
 
 function ConnectionIndicator({
