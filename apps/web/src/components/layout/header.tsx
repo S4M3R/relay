@@ -16,7 +16,7 @@ export function Header() {
             docs
           </Link>
           <Link
-            href="https://github.com"
+            href="https://github.com/S4M3R/relay.git"
             className="text-muted hover:text-foreground transition-colors text-sm"
             target="_blank"
             rel="noopener noreferrer"
