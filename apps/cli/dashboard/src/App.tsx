@@ -6,17 +6,9 @@ import InstanceDetailPage from './pages/InstanceDetailPage';
 import CreateInstancePage from './pages/CreateInstancePage';
 import TranscriptPage from './pages/TranscriptPage';
 import LoginPage from './pages/LoginPage';
-
-function Placeholder({ name }: { name: string }) {
-  return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="text-center">
-        <h1 className="text-2xl font-mono text-white/80">{name}</h1>
-        <p className="text-white/40 mt-2 font-mono text-sm">Coming soon</p>
-      </div>
-    </div>
-  );
-}
+import ConfigPage from './pages/ConfigPage';
+import CallPage from './pages/CallPage';
+import TelegramLoginPage from './pages/TelegramLoginPage';
 
 export default function App() {
   return (
@@ -28,8 +20,9 @@ export default function App() {
         <Route path="/instances/:id" element={<InstanceDetailPage />} />
         <Route path="/instances/:id/transcript" element={<TranscriptPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/config" element={<Placeholder name="Config" />} />
-        <Route path="/call" element={<Placeholder name="Call" />} />
+        <Route path="/config" element={<ConfigPage />} />
+        <Route path="/call" element={<CallPage />} />
+        <Route path="/telegram-login" element={<TelegramLoginPage />} />
       </Route>
     </Routes>
   );
