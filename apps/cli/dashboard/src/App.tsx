@@ -1,5 +1,10 @@
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
+import StatusPage from './pages/StatusPage';
+import InstancesPage from './pages/InstancesPage';
+import InstanceDetailPage from './pages/InstanceDetailPage';
+import CreateInstancePage from './pages/CreateInstancePage';
+import TranscriptPage from './pages/TranscriptPage';
 
 function Placeholder({ name }: { name: string }) {
   return (
@@ -16,11 +21,11 @@ export default function App() {
   return (
     <Routes>
       <Route element={<DashboardLayout />}>
-        <Route path="/" element={<Placeholder name="Status" />} />
-        <Route path="/instances" element={<Placeholder name="Instances" />} />
-        <Route path="/instances/new" element={<Placeholder name="Create Instance" />} />
-        <Route path="/instances/:id" element={<Placeholder name="Instance Detail" />} />
-        <Route path="/instances/:id/transcript" element={<Placeholder name="Transcript" />} />
+        <Route path="/" element={<StatusPage />} />
+        <Route path="/instances" element={<InstancesPage />} />
+        <Route path="/instances/new" element={<CreateInstancePage />} />
+        <Route path="/instances/:id" element={<InstanceDetailPage />} />
+        <Route path="/instances/:id/transcript" element={<TranscriptPage />} />
         <Route path="/login" element={<Placeholder name="Login" />} />
         <Route path="/config" element={<Placeholder name="Config" />} />
         <Route path="/call" element={<Placeholder name="Call" />} />
