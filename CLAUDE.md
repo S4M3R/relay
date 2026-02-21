@@ -12,9 +12,13 @@ npm run dev:cli          # Run CLI in dev mode (tsx)
 npm run dev:web          # Run web in dev mode (next dev)
 
 # Building
-npm run build            # Build both apps
-npm run build:cli        # Build CLI only (tsc → dist/)
+npm run build            # Build both apps (CLI + dashboard)
+npm run build:cli        # Build CLI only (dashboard Vite build + tsc → dist/)
 npm run build:web        # Build web only (next build)
+
+# Dashboard
+cd apps/cli && npm run build && node dist/index.js stop && node dist/index.js start
+node dist/index.js dashboard   # Opens dashboard in browser
 
 # Linting (web only)
 cd apps/web && npx eslint .
@@ -22,15 +26,22 @@ cd apps/web && npx eslint .
 
 There is no test framework configured. No shared packages exist between apps.
 
+**IMPORTANT**: The daemon runs as a detached process. After ANY change to backend code (`apps/cli/src/`) or dashboard code (`apps/cli/dashboard/`), you MUST rebuild and restart the daemon for changes to take effect:
+1. `cd apps/cli && npm run build`
+2. `node dist/index.js stop`
+3. `node dist/index.js start`
+
 ## Architecture
 
 **relay-agent CLI** (`apps/cli/`) — A Node.js daemon that manages autonomous WhatsApp conversations via LLM agents.
 
-- **Entry**: `src/index.ts` — Commander.js CLI with 14 commands (init, start, stop, create, list, get, send, transcript, pause, resume, cancel, status, login, client)
+- **Entry**: `src/index.ts` — Commander.js CLI with 17 commands (init, start, stop, create, list, get, send, transcript, pause, resume, cancel, status, login, call, telegram-login, config, dashboard)
 - **Daemon**: HTTP server on `127.0.0.1:3214`. Routes in `src/daemon/routes.ts`, lifecycle in `src/daemon/entry.ts`
 - **State Machine**: `src/engine/state-machine.ts` — Finite state machine governing conversation instance lifecycle. 11 states (CREATED → QUEUED → ACTIVE → WAITING_FOR_REPLY/WAITING_FOR_AGENT → COMPLETED/FAILED/ABANDONED). Terminal states trigger cleanup callbacks
 - **Agent Session**: `src/agent/session.ts` — Dual-provider support (Anthropic + OpenAI). Tools: `send_message`, `mark_todo_item`, `end_conversation`, `request_human_intervention`. Uses dependency injection via `SessionDependencies` interface
 - **WhatsApp**: `src/whatsapp/connection.ts` — Baileys library for WhatsApp Web. QR code auth flow, message send/receive
+- **Dashboard**: `dashboard/` — Self-contained Vite + React app served by the daemon at `http://127.0.0.1:3214/dashboard/`. Ephemeral token auth (generated on daemon start). Pages: Status, Instances, Instance Detail, Create, Transcript, Login (QR), Config, Call, Telegram Login
+- **Auth**: `src/daemon/auth.ts` — Token generation (crypto.randomBytes), timing-safe validation; `src/daemon/static.ts` — Static file serving with CSP headers and path traversal prevention
 - **Storage**: lowdb JSON file stores in `.relay-agent/` directory — config, instances, transcripts
 - **Types**: `src/types.ts` — Core data models (`ConversationInstance`, `StateEvent`, `InstanceState`, etc.)
 

@@ -38,6 +38,12 @@ const messageCallbacks: Array<(message: IncomingMessage) => void> = [];
 /** Reconnect timer reference for cleanup */
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
+/** Last QR code data received from Baileys (for dashboard API) */
+let lastQrCode: string | null = null;
+
+/** ISO 8601 timestamp of when the last QR code was generated */
+let lastQrGeneratedAt: string | null = null;
+
 /**
  * LID ↔ Phone JID mapping.
  * Baileys v7 may report incoming messages with LID-based JIDs (@lid) instead
@@ -126,11 +132,14 @@ function handleConnectionUpdate(
   if (qr) {
     logger.info('QR code received. Rendering in terminal...');
     qrcode.generate(qr, { small: true });
+    lastQrCode = qr;
+    lastQrGeneratedAt = new Date().toISOString();
   }
 
   if (connection === 'open') {
     connectionState = 'connected';
     reconnectAttempts = 0;
+    lastQrCode = null;
     logger.info('WhatsApp connection established');
     updateConfig({ whatsapp_connected: true }).catch((err: unknown) => {
       logger.error({ err }, 'Failed to update config after WhatsApp connection');
@@ -303,6 +312,29 @@ function scheduleReconnect(): void {
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
+
+/**
+ * Returns the latest QR code data, generation timestamp, and connection status.
+ * Used by the dashboard API to expose QR codes for browser-based scanning.
+ */
+export function getQrData(): {
+  qr: string | null;
+  generated_at: string | null;
+  connected: boolean;
+  status: string;
+} {
+  return {
+    qr: lastQrCode,
+    generated_at: lastQrGeneratedAt,
+    connected: connectionState === 'connected',
+    status:
+      connectionState === 'connected'
+        ? 'connected'
+        : connectionState === 'connecting'
+          ? 'scanning'
+          : 'waiting',
+  };
+}
 
 /**
  * Returns the current WhatsApp connection state.

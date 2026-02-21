@@ -10,8 +10,9 @@
   ],
   "scripts": {
     "dev": "tsx src/index.ts",
-    "build": "tsc",
-    "prepublishOnly": "tsc",
+    "build:dashboard": "cd dashboard && npm install && npx vite build",
+    "build": "npm run build:dashboard && tsc",
+    "prepublishOnly": "npm run build",
     "start": "node dist/index.js"
   },
   "dependencies": {

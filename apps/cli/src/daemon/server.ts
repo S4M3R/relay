@@ -1,5 +1,7 @@
 import http from 'node:http';
 import { handleRequest, setServerStartTime } from './routes.js';
+import { generateToken, getToken, validateToken, extractToken } from './auth.js';
+import { handleDashboardRequest } from './static.js';
 import { initStores } from '../store/index.js';
 import logger from '../utils/logger.js';
 
@@ -64,17 +66,59 @@ export async function startServer(): Promise<http.Server> {
   const startTime = Date.now();
   setServerStartTime(startTime);
 
-  const server = http.createServer(async (req, res) => {
-    // Set JSON content type for all responses
-    res.setHeader('Content-Type', 'application/json');
+  // Generate dashboard auth token
+  generateToken();
+  logger.info('Dashboard auth token generated');
 
+  const server = http.createServer(async (req, res) => {
+    const urlPath = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`).pathname;
+
+    // 1. Token retrieval endpoint -- auth-exempt (localhost-only is security boundary)
+    if (urlPath === '/dashboard/token' && req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ token: getToken(), expires: null }));
+      return;
+    }
+
+    // 2. Dashboard static files -- auth required for HTML, assets are public
+    if (urlPath.startsWith('/dashboard')) {
+      // Static assets (JS, CSS, images) must be publicly accessible since
+      // browsers cannot attach tokens to <script>/<link> tag requests.
+      // Auth is enforced on the HTML entry point; the JS app then uses
+      // the token from the URL for all subsequent API calls.
+      const isStaticAsset = urlPath.startsWith('/dashboard/assets/');
+      if (!isStaticAsset) {
+        const token = extractToken(req);
+        if (!validateToken(token)) {
+          logger.warn({ url: req.url }, 'Dashboard auth failed');
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Unauthorized' }));
+          return;
+        }
+      }
+      const handled = await handleDashboardRequest(req, res, urlPath);
+      if (handled) return;
+    }
+
+    // 3. API routes -- auth check for requests WITH Authorization header (backward compat)
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      const token = extractToken(req);
+      if (!validateToken(token)) {
+        logger.warn({ url: req.url }, 'API auth failed');
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Unauthorized' }));
+        return;
+      }
+    }
+
+    // 4. Existing API routes (Content-Type set by sendJson/sendError in routes.ts)
     try {
       const body = await parseJsonBody(req);
       await handleRequest(req, res, body);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
 
-      // Handle JSON parse errors specifically
       if (message === 'Invalid JSON in request body') {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Invalid JSON in request body' }));
