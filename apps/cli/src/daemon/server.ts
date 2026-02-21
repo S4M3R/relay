@@ -80,14 +80,21 @@ export async function startServer(): Promise<http.Server> {
       return;
     }
 
-    // 2. Dashboard static files -- auth required, no JSON body parsing
+    // 2. Dashboard static files -- auth required for HTML, assets are public
     if (urlPath.startsWith('/dashboard')) {
-      const token = extractToken(req);
-      if (!validateToken(token)) {
-        logger.warn({ url: req.url }, 'Dashboard auth failed');
-        res.writeHead(401, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Unauthorized' }));
-        return;
+      // Static assets (JS, CSS, images) must be publicly accessible since
+      // browsers cannot attach tokens to <script>/<link> tag requests.
+      // Auth is enforced on the HTML entry point; the JS app then uses
+      // the token from the URL for all subsequent API calls.
+      const isStaticAsset = urlPath.startsWith('/dashboard/assets/');
+      if (!isStaticAsset) {
+        const token = extractToken(req);
+        if (!validateToken(token)) {
+          logger.warn({ url: req.url }, 'Dashboard auth failed');
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Unauthorized' }));
+          return;
+        }
       }
       const handled = await handleDashboardRequest(req, res, urlPath);
       if (handled) return;
