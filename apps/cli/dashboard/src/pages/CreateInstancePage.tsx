@@ -33,6 +33,7 @@ export default function CreateInstancePage() {
 
   const [objective, setObjective] = useState('');
   const [targetContact, setTargetContact] = useState('');
+  const [telegramChatId, setTelegramChatId] = useState('');
   const [channel, setChannel] = useState<Channel>('whatsapp');
   const [todos, setTodos] = useState<TodoEntry[]>(() => [createTodoEntry()]);
   const [intervalMs, setIntervalMs] = useState(1800000);
@@ -49,10 +50,22 @@ export default function CreateInstancePage() {
       errors.objective = 'Objective is required';
     }
 
-    if (!targetContact.trim()) {
-      errors.target_contact = 'Contact phone number is required';
-    } else if (!E164_PATTERN.test(targetContact.trim())) {
-      errors.target_contact = 'Must be E.164 format (e.g. +15551234567)';
+    if (channel === 'telegram') {
+      // For Telegram: need either chat ID or phone number
+      if (!telegramChatId.trim() && !targetContact.trim()) {
+        errors.telegram_chat_id = 'Telegram Chat ID or phone number is required';
+      } else if (telegramChatId.trim() && !/^\d+$/.test(telegramChatId.trim())) {
+        errors.telegram_chat_id = 'Chat ID must be a number';
+      }
+      if (targetContact.trim() && !E164_PATTERN.test(targetContact.trim())) {
+        errors.target_contact = 'Must be E.164 format (e.g. +15551234567)';
+      }
+    } else {
+      if (!targetContact.trim()) {
+        errors.target_contact = 'Contact phone number is required';
+      } else if (!E164_PATTERN.test(targetContact.trim())) {
+        errors.target_contact = 'Must be E.164 format (e.g. +15551234567)';
+      }
     }
 
     const nonEmptyTodos = todos.filter((t) => t.text.trim().length > 0);
@@ -62,7 +75,7 @@ export default function CreateInstancePage() {
 
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [objective, targetContact, todos]);
+  }, [objective, targetContact, telegramChatId, channel, todos]);
 
   const handleAddTodo = useCallback(() => {
     setTodos((prev) => [...prev, createTodoEntry()]);
@@ -88,9 +101,9 @@ export default function CreateInstancePage() {
 
       setSubmitting(true);
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         objective: objective.trim(),
-        target_contact: targetContact.trim(),
+        target_contact: targetContact.trim() || (channel === 'telegram' ? `tg_${telegramChatId.trim()}` : ''),
         channel,
         todos: todos
           .filter((t) => t.text.trim().length > 0)
@@ -100,6 +113,9 @@ export default function CreateInstancePage() {
           max_followups: maxFollowups,
         },
       };
+      if (channel === 'telegram' && telegramChatId.trim()) {
+        payload.telegram_chat_id = telegramChatId.trim();
+      }
 
       try {
         const result = await apiPost<CreateInstanceResponse>('/instances', payload);
@@ -158,7 +174,8 @@ export default function CreateInstancePage() {
               htmlFor="target_contact"
               className="block text-xs font-mono font-medium text-white/60 uppercase tracking-wider mb-1.5"
             >
-              Contact Phone <span className="text-red-400">*</span>
+              Contact Phone {channel !== 'telegram' && <span className="text-red-400">*</span>}
+              {channel === 'telegram' && <span className="text-white/30 text-[10px] ml-1">(optional if Chat ID provided)</span>}
             </label>
             <input
               id="target_contact"
@@ -192,6 +209,32 @@ export default function CreateInstancePage() {
               <option value="phone">Phone</option>
             </select>
           </div>
+
+          {/* Telegram Chat ID (shown only for Telegram) */}
+          {channel === 'telegram' && (
+            <div>
+              <label
+                htmlFor="telegram_chat_id"
+                className="block text-xs font-mono font-medium text-white/60 uppercase tracking-wider mb-1.5"
+              >
+                Telegram Chat ID <span className="text-red-400">*</span>
+              </label>
+              <input
+                id="telegram_chat_id"
+                type="text"
+                value={telegramChatId}
+                onChange={(e) => setTelegramChatId(e.target.value)}
+                placeholder="123456789"
+                className="w-full rounded-md border border-glass-border bg-white/[0.03] px-3 py-2 text-sm font-mono text-white/90 placeholder:text-white/20 focus:border-accent-blue focus:outline-none focus:ring-1 focus:ring-accent-blue/50"
+              />
+              <p className="mt-1 text-xs font-mono text-white/30">
+                Numeric chat ID of the Telegram user. Phone number is optional when chat ID is provided.
+              </p>
+              {fieldErrors.telegram_chat_id && (
+                <p className="mt-1 text-xs font-mono text-red-400">{fieldErrors.telegram_chat_id}</p>
+              )}
+            </div>
+          )}
 
           {/* Todos */}
           <div>
