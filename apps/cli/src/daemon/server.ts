@@ -65,9 +65,6 @@ export async function startServer(): Promise<http.Server> {
   setServerStartTime(startTime);
 
   const server = http.createServer(async (req, res) => {
-    // Set JSON content type for all responses
-    res.setHeader('Content-Type', 'application/json');
-
     try {
       const body = await parseJsonBody(req);
       await handleRequest(req, res, body);
