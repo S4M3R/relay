@@ -6,8 +6,20 @@
 
 const TOKEN_KEY = 'relay-dashboard-token';
 
+// Global 401 listener — components can subscribe to show unauthorized UI
+type UnauthorizedListener = () => void;
+let onUnauthorized: UnauthorizedListener | null = null;
+
+export function setOnUnauthorized(listener: UnauthorizedListener | null): void {
+  onUnauthorized = listener;
+}
+
 function getToken(): string | null {
-  return sessionStorage.getItem(TOKEN_KEY);
+  const session = sessionStorage.getItem(TOKEN_KEY);
+  if (session) return session;
+  // Fallback to cookie
+  const match = document.cookie.match(/(?:^|; )relay-token=([^;]+)/);
+  return match ? match[1] : null;
 }
 
 function getHeaders(): Record<string, string> {
@@ -34,6 +46,10 @@ export class ApiError extends Error {
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (response.status === 401) {
+    // Clear stale token
+    sessionStorage.removeItem(TOKEN_KEY);
+    document.cookie = 'relay-token=; path=/dashboard; max-age=0';
+    onUnauthorized?.();
     throw new ApiError(
       'Session expired. Please re-run `relay dashboard` to get a new token.',
       401,
