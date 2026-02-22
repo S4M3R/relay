@@ -23,6 +23,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Status', shortLabel: 'STS' },
+  { to: '/contacts', label: 'Contacts', shortLabel: 'CON' },
   { to: '/instances', label: 'Instances', shortLabel: 'INS' },
   { to: '/instances/new', label: 'Create', shortLabel: 'NEW' },
   { to: '/login', label: 'Login', shortLabel: 'LOG' },

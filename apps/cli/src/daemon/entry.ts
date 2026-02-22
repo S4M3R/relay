@@ -13,7 +13,7 @@ import { createSession, destroySession, destroyAllSessions } from '../agent/sess
 import { onInstanceTerminal } from '../engine/queue.js';
 import * as InstanceStore from '../store/instances.js';
 import * as TranscriptStore from '../store/transcripts.js';
-import { getConfigDb, getInstancesDb, getTranscriptsDb } from '../store/index.js';
+import { getConfigDb, getInstancesDb, getTranscriptsDb, getContactsDb } from '../store/index.js';
 import { transition } from '../engine/state-machine.js';
 import { scheduleHeartbeat } from '../engine/heartbeat.js';
 import logger from '../utils/logger.js';
@@ -120,6 +120,7 @@ async function main(): Promise<void> {
         await getConfigDb().write();
         await getInstancesDb().write();
         await getTranscriptsDb().write();
+        await getContactsDb().write();
         logger.info('All stores flushed to disk');
       } catch (flushErr) {
         const flushMsg = flushErr instanceof Error ? flushErr.message : 'Unknown error';

@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { Bot } from 'grammy';
 import logger from '../utils/logger.js';
 import { updateConfig } from '../store/config.js';
+import * as ContactStore from '../store/contacts.js';
 
 // ---------------------------------------------------------------------------
 // Module state
@@ -133,6 +134,10 @@ export async function connectTelegram(botToken?: string): Promise<void> {
           : `+${contact.phone_number}`;
         const chatId = String(ctx.message.chat.id);
         registerChatMapping(phone, chatId);
+        // Persist contact to store
+        ContactStore.findOrCreateByPhone(phone, 'telegram', chatId).catch((err) => {
+          logger.warn({ phone, chatId, error: err instanceof Error ? err.message : 'Unknown' }, 'Failed to persist contact from Telegram contact share');
+        });
         logger.info({ phone, chatId }, 'Telegram contact shared — phone mapped to chat ID');
       }
     });

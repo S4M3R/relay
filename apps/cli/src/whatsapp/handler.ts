@@ -1,6 +1,7 @@
 import type { IncomingMessage } from './connection.js';
 import * as InstanceStore from '../store/instances.js';
 import * as TranscriptStore from '../store/transcripts.js';
+import * as ContactStore from '../store/contacts.js';
 import { transition } from '../engine/state-machine.js';
 import { processWithAgent } from '../agent/session.js';
 import { cancelHeartbeat, scheduleHeartbeat } from '../engine/heartbeat.js';
@@ -77,6 +78,13 @@ async function handleIncomingMessage(
 
   // Normalize phone number to international format with + prefix
   const phone = senderPhone.startsWith('+') ? senderPhone : `+${senderPhone}`;
+
+  // Auto-create contact record for this sender
+  try {
+    await ContactStore.findOrCreateByPhone(phone, 'whatsapp');
+  } catch (err) {
+    logger.warn({ phone, error: err instanceof Error ? err.message : 'Unknown' }, 'Failed to auto-create contact from WhatsApp message');
+  }
 
   // Look up active instance for this contact
   const instance = await deps.instanceStore.getActiveForContact(phone);

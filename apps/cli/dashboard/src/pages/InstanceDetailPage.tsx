@@ -27,6 +27,7 @@ interface ConversationInstance {
   id: string;
   objective: string;
   target_contact: string;
+  contact_id: string | null;
   todos: TodoItem[];
   state: string;
   previous_state: string | null;
@@ -234,7 +235,17 @@ export default function InstanceDetailPage() {
           </div>
           <div>
             <span className="text-white/40">Contact</span>
-            <p className="text-white/70 mt-0.5">{instance.target_contact}</p>
+            <p className="text-white/70 mt-0.5">
+              {instance.target_contact}
+              {instance.contact_id && (
+                <Link
+                  to={`/contacts/${instance.contact_id}`}
+                  className="ml-2 text-accent-blue hover:text-accent-cyan transition-colors"
+                >
+                  View Contact
+                </Link>
+              )}
+            </p>
           </div>
           <div>
             <span className="text-white/40">Created</span>

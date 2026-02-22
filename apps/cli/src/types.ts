@@ -48,12 +48,34 @@ export interface ElevenLabsData {
   call_sid?: string;
 }
 
+/** A contact represents a person the agent can communicate with. */
+export interface Contact {
+  /** UUID v4 */
+  id: string;
+  /** Display name (e.g., "John Doe") */
+  name: string;
+  /** Phone number in international format (e.g., "+56912345678"). Optional for Telegram-only contacts. */
+  phone: string | null;
+  /** Telegram chat ID (set when contact messages the bot or manually provided) */
+  telegram_chat_id: string | null;
+  /** Channel through which the contact was first seen */
+  channel: ConversationChannel;
+  /** Additional notes about the contact */
+  notes: string | null;
+  /** ISO 8601 */
+  created_at: string;
+  /** ISO 8601 */
+  updated_at: string;
+}
+
 export interface ConversationInstance {
   /** UUID v4 */
   id: string;
   objective: string;
   /** Phone number in international format (e.g., "+56912345678") */
   target_contact: string;
+  /** Contact ID (links to Contact record) */
+  contact_id: string | null;
   todos: TodoItem[];
   state: InstanceState;
   /** Used for PAUSED resume; null when not paused */

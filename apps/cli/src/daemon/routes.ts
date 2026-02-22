@@ -12,6 +12,7 @@ import type {
 import * as InstanceStore from '../store/instances.js';
 import * as TranscriptStore from '../store/transcripts.js';
 import * as ConfigStore from '../store/config.js';
+import * as ContactStore from '../store/contacts.js';
 import { transition } from '../engine/state-machine.js';
 import type { StateEvent } from '../types.js';
 import {
@@ -228,9 +229,26 @@ async function handleCreateInstance(body: Record<string, unknown>, res: http.Ser
     ...(typeof heartbeat_config === 'object' && heartbeat_config !== null ? heartbeat_config : {}),
   };
 
+  // Auto-create or find the contact for this instance
+  let contactId: string | null = null;
+  const contactPhone = target_contact as string;
+  const telegramChatIdFromBody = (body as Record<string, unknown>).telegram_chat_id as string | undefined;
+  try {
+    if (channel === 'telegram' && telegramChatIdFromBody && !contactPhone.trim()) {
+      const contact = await ContactStore.findOrCreateByTelegramChatId(telegramChatIdFromBody);
+      contactId = contact.id;
+    } else if (contactPhone.trim()) {
+      const contact = await ContactStore.findOrCreateByPhone(contactPhone, channel, telegramChatIdFromBody);
+      contactId = contact.id;
+    }
+  } catch (err) {
+    logger.warn({ error: err instanceof Error ? err.message : 'Unknown' }, 'Failed to auto-create contact for instance');
+  }
+
   const instanceData: Omit<ConversationInstance, 'id' | 'created_at' | 'updated_at'> = {
     objective: objective as string,
     target_contact: target_contact as string,
+    contact_id: contactId,
     todos: todoItems,
     state: 'CREATED',
     previous_state: null,
@@ -655,6 +673,130 @@ async function handleCall(body: Record<string, unknown>, res: http.ServerRespons
 }
 
 // ============================================
+// Contact Handlers
+// ============================================
+
+/**
+ * GET /contacts
+ * Return all contacts.
+ */
+async function handleListContacts(res: http.ServerResponse): Promise<void> {
+  const contacts = await ContactStore.getAll();
+  sendJson(res, 200, contacts);
+}
+
+/**
+ * GET /contacts/:id
+ * Return a single contact by ID.
+ */
+async function handleGetContact(id: string, res: http.ServerResponse): Promise<void> {
+  const contact = await ContactStore.getById(id);
+  if (!contact) {
+    sendError(res, 404, 'Contact not found', `No contact with id: ${id}`);
+    return;
+  }
+  sendJson(res, 200, contact);
+}
+
+/**
+ * GET /contacts/:id/instances
+ * Return all instances for a contact.
+ */
+async function handleGetContactInstances(id: string, res: http.ServerResponse): Promise<void> {
+  const contact = await ContactStore.getById(id);
+  if (!contact) {
+    sendError(res, 404, 'Contact not found', `No contact with id: ${id}`);
+    return;
+  }
+  const allInstances = await InstanceStore.getAll();
+  const contactInstances = allInstances.filter((inst) => inst.contact_id === id);
+  sendJson(res, 200, contactInstances);
+}
+
+/**
+ * POST /contacts
+ * Create a new contact.
+ */
+async function handleCreateContact(body: Record<string, unknown>, res: http.ServerResponse): Promise<void> {
+  const { name, phone, telegram_chat_id, channel, notes } = body;
+
+  if (typeof name !== 'string' || !name.trim()) {
+    sendError(res, 400, 'Missing required field: name');
+    return;
+  }
+
+  // Check for duplicate phone
+  if (typeof phone === 'string' && phone.trim()) {
+    const existing = await ContactStore.getByPhone(phone.trim());
+    if (existing) {
+      sendError(res, 409, 'A contact with this phone number already exists', `Contact ID: ${existing.id}`);
+      return;
+    }
+  }
+
+  // Check for duplicate telegram_chat_id
+  if (typeof telegram_chat_id === 'string' && telegram_chat_id.trim()) {
+    const existing = await ContactStore.getByTelegramChatId(telegram_chat_id.trim());
+    if (existing) {
+      sendError(res, 409, 'A contact with this Telegram chat ID already exists', `Contact ID: ${existing.id}`);
+      return;
+    }
+  }
+
+  const contactChannel = channel === 'telegram' ? 'telegram' : channel === 'phone' ? 'phone' : 'whatsapp';
+
+  const contact = await ContactStore.create({
+    name: (name as string).trim(),
+    phone: typeof phone === 'string' && phone.trim() ? phone.trim() : null,
+    telegram_chat_id: typeof telegram_chat_id === 'string' && telegram_chat_id.trim() ? telegram_chat_id.trim() : null,
+    channel: contactChannel as 'whatsapp' | 'telegram' | 'phone',
+    notes: typeof notes === 'string' ? notes.trim() : null,
+  });
+
+  logger.info({ contactId: contact.id, name: contact.name }, 'Contact created');
+  sendJson(res, 201, contact);
+}
+
+/**
+ * PUT /contacts/:id
+ * Update a contact.
+ */
+async function handleUpdateContact(id: string, body: Record<string, unknown>, res: http.ServerResponse): Promise<void> {
+  const contact = await ContactStore.getById(id);
+  if (!contact) {
+    sendError(res, 404, 'Contact not found', `No contact with id: ${id}`);
+    return;
+  }
+
+  const updates: Record<string, unknown> = {};
+  if (typeof body.name === 'string') updates.name = body.name.trim();
+  if (typeof body.phone === 'string') updates.phone = body.phone.trim() || null;
+  if (body.phone === null) updates.phone = null;
+  if (typeof body.telegram_chat_id === 'string') updates.telegram_chat_id = body.telegram_chat_id.trim() || null;
+  if (body.telegram_chat_id === null) updates.telegram_chat_id = null;
+  if (typeof body.notes === 'string') updates.notes = body.notes.trim() || null;
+  if (body.notes === null) updates.notes = null;
+
+  const updated = await ContactStore.update(id, updates);
+  logger.info({ contactId: id }, 'Contact updated');
+  sendJson(res, 200, updated);
+}
+
+/**
+ * DELETE /contacts/:id
+ * Delete a contact.
+ */
+async function handleDeleteContact(id: string, res: http.ServerResponse): Promise<void> {
+  const deleted = await ContactStore.remove(id);
+  if (!deleted) {
+    sendError(res, 404, 'Contact not found', `No contact with id: ${id}`);
+    return;
+  }
+  logger.info({ contactId: id }, 'Contact deleted');
+  sendJson(res, 200, { deleted: true });
+}
+
+// ============================================
 // Main Router
 // ============================================
 
@@ -714,6 +856,46 @@ export async function handleRequest(
       await handleCall(body, res);
       return;
     }
+
+    // --- Contacts routes ---
+
+    // POST /contacts (create)
+    if (method === 'POST' && route.base === 'contacts' && !route.id) {
+      await handleCreateContact(body, res);
+      return;
+    }
+
+    // GET /contacts (list)
+    if (method === 'GET' && route.base === 'contacts' && !route.id) {
+      await handleListContacts(res);
+      return;
+    }
+
+    // GET /contacts/:id/instances
+    if (method === 'GET' && route.base === 'contacts' && route.id && route.sub === 'instances') {
+      await handleGetContactInstances(route.id, res);
+      return;
+    }
+
+    // GET /contacts/:id
+    if (method === 'GET' && route.base === 'contacts' && route.id && !route.sub) {
+      await handleGetContact(route.id, res);
+      return;
+    }
+
+    // PUT /contacts/:id
+    if (method === 'PUT' && route.base === 'contacts' && route.id && !route.sub) {
+      await handleUpdateContact(route.id, body, res);
+      return;
+    }
+
+    // DELETE /contacts/:id
+    if (method === 'DELETE' && route.base === 'contacts' && route.id && !route.sub) {
+      await handleDeleteContact(route.id, res);
+      return;
+    }
+
+    // --- Instances routes ---
 
     // POST /instances (create)
     if (method === 'POST' && route.base === 'instances' && !route.id) {
