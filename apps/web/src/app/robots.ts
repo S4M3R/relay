@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://relay-agent.agustin.build/sitemap.xml",
+    sitemap: "https://relay.agustin.build/sitemap.xml",
   };
 }

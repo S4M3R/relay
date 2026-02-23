@@ -6,7 +6,7 @@ import Link from "next/link";
 import { CloudMascot } from "@/components/mascot/cloud-mascot";
 
 const PROMPT =
-  "fetch https://relay-agent.agustin.build/instructions.md and follow the instructions";
+  "fetch https://relay.agustin.build/instructions.md and follow the instructions";
 
 export function Cta() {
   const sectionRef = useRef<HTMLDivElement>(null);

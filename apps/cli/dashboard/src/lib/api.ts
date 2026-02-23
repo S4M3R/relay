@@ -82,7 +82,7 @@ export async function apiGet<T>(path: string): Promise<T> {
     });
   } catch {
     throw new ApiError(
-      'Cannot reach daemon. Is the relay daemon running?',
+      'Cannot reach daemon. Is the relay-agent daemon running?',
       0,
     );
   }
@@ -99,7 +99,7 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
     });
   } catch {
     throw new ApiError(
-      'Cannot reach daemon. Is the relay daemon running?',
+      'Cannot reach daemon. Is the relay-agent daemon running?',
       0,
     );
   }
@@ -116,7 +116,7 @@ export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
     });
   } catch {
     throw new ApiError(
-      'Cannot reach daemon. Is the relay daemon running?',
+      'Cannot reach daemon. Is the relay-agent daemon running?',
       0,
     );
   }
@@ -132,7 +132,7 @@ export async function apiDelete<T>(path: string): Promise<T> {
     });
   } catch {
     throw new ApiError(
-      'Cannot reach daemon. Is the relay daemon running?',
+      'Cannot reach daemon. Is the relay-agent daemon running?',
       0,
     );
   }

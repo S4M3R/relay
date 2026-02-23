@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CloudMascot } from "@/components/mascot/cloud-mascot";
 
 const SUMMON_MESSAGE =
-  "fetch https://relay-agent.agustin.build/instructions.md and follow the instructions";
+  "fetch https://relay.agustin.build/instructions.md and follow the instructions";
 
 /** Small glowing particles that burst outward when the mascot spawns */
 function SpawnParticles({ count = 6 }: { count?: number }) {

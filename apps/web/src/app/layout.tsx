@@ -8,7 +8,7 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
-const baseUrl = "https://relay-agent.agustin.build";
+const baseUrl = "https://relay.agustin.build";
 
 export const metadata: Metadata = {
   title: {
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/opengraph-image",
+        url: `${baseUrl}/opengraph-image`,
         width: 1200,
         height: 630,
         alt: "relay — the agent your agent sends to talk to people",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     title: "relay — your agent's brother for human conversations",
     description:
       "A second agent that talks to people while yours keeps working. WhatsApp messaging, automatic follow-ups, objective-locked conversations — isolated from your system.",
-    images: ["/opengraph-image"],
+    images: [`${baseUrl}/opengraph-image`],
   },
   robots: {
     index: true,
