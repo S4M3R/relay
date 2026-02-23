@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { source } from "@/lib/source";
 
-const baseUrl = "https://relay-agent.agustin.build";
+const baseUrl = "https://relay.agustin.build";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const docPages = source.getPages().map((page) => ({

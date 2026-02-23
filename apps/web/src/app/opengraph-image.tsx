@@ -72,7 +72,7 @@ export default async function Image() {
             letterSpacing: "0.1em",
           }}
         >
-          relay-agent.agustin.build
+          relay.agustin.build
         </div>
       </div>
     ),

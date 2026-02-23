@@ -8,7 +8,7 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
-const baseUrl = "https://relay-agent.agustin.build";
+const baseUrl = "https://relay.agustin.build";
 
 export const metadata: Metadata = {
   title: {
