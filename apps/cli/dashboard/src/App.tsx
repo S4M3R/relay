@@ -24,7 +24,7 @@ function UnauthorizedScreen() {
           Your dashboard token is invalid or has expired. Run the following command to open a new session:
         </p>
         <div className="rounded-lg bg-black/50 border border-white/10 p-4 mb-6">
-          <code className="text-cyan-400 font-mono text-sm">relay dashboard</code>
+          <code className="text-cyan-400 font-mono text-sm">relay-agent dashboard</code>
         </div>
         <p className="text-white/30 text-xs">
           This generates a new auth token and opens the dashboard in your browser.

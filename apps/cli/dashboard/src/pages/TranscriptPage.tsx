@@ -47,7 +47,7 @@ export default function TranscriptPage() {
   if (!id) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-white/40 font-mono text-sm">No instance ID provided.</p>
+        <p className="text-white/40 font-mono text-sm">No conversation ID provided.</p>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export default function TranscriptPage() {
             to={`/instances/${id}`}
             className="text-xs font-mono text-accent-blue hover:text-accent-cyan transition-colors"
           >
-            &larr; Back to instance
+            &larr; Back to conversation
           </Link>
         </div>
 
