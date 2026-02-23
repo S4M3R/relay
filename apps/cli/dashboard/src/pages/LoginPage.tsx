@@ -136,7 +136,7 @@ export default function LoginPage() {
             Telegram login is configured via CLI.
           </p>
           <p className="text-xs font-mono text-white/30">
-            Run: relay-agent telegram login
+            Run: <code className="text-accent-cyan">relay-agent telegram-login</code>
           </p>
         </div>
       </div>

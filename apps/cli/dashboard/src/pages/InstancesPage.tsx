@@ -53,10 +53,10 @@ export default function InstancesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-mono font-bold text-white/90">
-            Instances
+            Conversations
           </h1>
           <p className="text-xs font-mono text-white/40 mt-1">
-            {instances.length} total instance{instances.length !== 1 ? 's' : ''}
+            {instances.length} total conversation{instances.length !== 1 ? 's' : ''}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -114,7 +114,7 @@ export default function InstancesPage() {
       {loading && !data && (
         <div className="flex items-center justify-center py-16">
           <p className="text-sm font-mono text-white/40 animate-pulse">
-            Loading instances...
+            Loading conversations...
           </p>
         </div>
       )}

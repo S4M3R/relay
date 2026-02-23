@@ -128,7 +128,7 @@ export default function InstanceDetailPage() {
         await apiPost(`/instances/${id}/${action}`);
         setActionFeedback({
           status: 'success',
-          message: `Instance ${action}d successfully`,
+          message: `Conversation ${action}d successfully`,
         });
         refresh();
       } catch (err) {
@@ -162,7 +162,7 @@ export default function InstanceDetailPage() {
   if (!id) {
     return (
       <div className="text-center py-16">
-        <p className="text-sm font-mono text-red-400">No instance ID provided</p>
+        <p className="text-sm font-mono text-red-400">No conversation ID provided</p>
       </div>
     );
   }
@@ -171,7 +171,7 @@ export default function InstanceDetailPage() {
     return (
       <div className="flex items-center justify-center py-16">
         <p className="text-sm font-mono text-white/40 animate-pulse">
-          Loading instance...
+          Loading conversation...
         </p>
       </div>
     );
@@ -184,7 +184,7 @@ export default function InstanceDetailPage() {
           to="/instances"
           className="text-xs font-mono text-accent-blue hover:text-accent-cyan transition-colors"
         >
-          &larr; Back to instances
+          &larr; Back to conversations
         </Link>
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
           <p className="text-sm font-mono text-red-400">{error}</p>
@@ -204,7 +204,7 @@ export default function InstanceDetailPage() {
         to="/instances"
         className="inline-block text-xs font-mono text-accent-blue hover:text-accent-cyan transition-colors"
       >
-        &larr; Back to instances
+        &larr; Back to conversations
       </Link>
 
       {/* Header section */}
@@ -230,7 +230,7 @@ export default function InstanceDetailPage() {
         {/* Metadata grid */}
         <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-xs font-mono">
           <div>
-            <span className="text-white/40">Instance ID</span>
+            <span className="text-white/40">Conversation ID</span>
             <p className="text-white/70 mt-0.5 break-all">{instance.id}</p>
           </div>
           <div>

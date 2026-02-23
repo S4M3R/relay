@@ -57,7 +57,7 @@ export default function TelegramLoginPage() {
         {connected && (
           <p className="text-xs font-mono text-white/40">
             The Telegram bot is running and accepting messages. Users can message
-            the bot directly to start interacting with relay instances configured
+            the bot directly to start interacting with relay-agent conversations configured
             for the Telegram channel.
           </p>
         )}

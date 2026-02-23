@@ -44,7 +44,7 @@ export default function InstanceTable({ instances }: InstanceTableProps) {
   if (instances.length === 0) {
     return (
       <div className="rounded-lg border border-glass-border bg-glass p-8 text-center">
-        <p className="text-white/40 font-mono text-sm">No instances found</p>
+        <p className="text-white/40 font-mono text-sm">No conversations found</p>
       </div>
     );
   }

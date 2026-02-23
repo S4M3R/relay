@@ -284,7 +284,7 @@ export default function ConfigPage() {
         const message =
           err instanceof ApiError
             ? err.message
-            : 'Failed to initialize relay';
+            : 'Failed to initialize relay-agent';
         setInitResult({ success: false, message });
       } finally {
         setInitializing(false);
@@ -476,7 +476,7 @@ export default function ConfigPage() {
       {/* Initialization Section */}
       <GlassCard title="Initialize Relay">
         <p className="text-xs font-mono text-white/40 mb-4">
-          Set up your relay agent with an LLM provider and connect WhatsApp.
+          Set up your relay-agent with an LLM provider and connect WhatsApp.
           After initialization, navigate to the Login page to scan the QR code.
         </p>
 

@@ -139,7 +139,7 @@ export default function StatusPage() {
         </GlassCard>
 
         {/* Instance summary */}
-        <GlassCard title="Instances">
+        <GlassCard title="Conversations">
           <StatRow label="Active" value={data.active_instance_count} />
           <StatRow label="Total" value={data.total_instance_count} />
         </GlassCard>

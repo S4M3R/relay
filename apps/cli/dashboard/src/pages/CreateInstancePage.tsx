@@ -162,7 +162,7 @@ export default function CreateInstancePage() {
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-lg font-mono font-bold text-white/90 mb-6">
-        Create Instance
+        Create Conversation
       </h1>
 
       {error && (
@@ -175,7 +175,7 @@ export default function CreateInstancePage() {
         {contactInfo && (
           <div className="mb-4 rounded-lg border border-accent-blue/20 bg-accent-blue/5 px-4 py-3">
             <p className="text-xs font-mono text-accent-blue">
-              Creating instance for contact: <span className="font-bold">{contactInfo.name}</span>
+              Creating conversation for contact: <span className="font-bold">{contactInfo.name}</span>
               {contactInfo.phone && <span className="text-white/40 ml-2">{contactInfo.phone}</span>}
             </p>
           </div>
@@ -368,7 +368,7 @@ export default function CreateInstancePage() {
             disabled={submitting}
             className="px-4 py-2 rounded-md text-xs font-mono font-medium text-white bg-accent-blue/80 hover:bg-accent-blue disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {submitting ? 'Creating...' : 'Create Instance'}
+            {submitting ? 'Creating...' : 'Create Conversation'}
           </button>
         </div>
       </form>

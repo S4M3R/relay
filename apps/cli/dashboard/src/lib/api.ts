@@ -51,7 +51,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
     document.cookie = 'relay-token=; path=/dashboard; max-age=0';
     onUnauthorized?.();
     throw new ApiError(
-      'Session expired. Please re-run `relay dashboard` to get a new token.',
+      'Session expired. Please re-run `relay-agent dashboard` to get a new token.',
       401,
     );
   }

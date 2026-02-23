@@ -118,7 +118,7 @@ export default function ContactDetailPage() {
             to={`/instances/new?contact=${contact.id}`}
             className="px-3 py-1.5 text-xs font-mono font-medium text-white bg-accent-blue/80 hover:bg-accent-blue rounded-md transition-colors"
           >
-            + New Instance
+            + New Conversation
           </Link>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function ContactDetailPage() {
       {/* Associated instances */}
       <div>
         <h2 className="text-sm font-mono font-bold text-white/70 mb-3">
-          Instances ({instances?.length ?? 0})
+          Conversations ({instances?.length ?? 0})
         </h2>
         {instances && instances.length > 0 ? (
           <div className="rounded-lg border border-glass-border bg-glass overflow-hidden">
@@ -206,7 +206,7 @@ export default function ContactDetailPage() {
         ) : (
           <div className="rounded-lg border border-glass-border bg-glass p-6 text-center">
             <p className="text-white/40 font-mono text-sm">
-              No instances for this contact
+              No conversations for this contact
             </p>
           </div>
         )}
